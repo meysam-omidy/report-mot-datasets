@@ -21,7 +21,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
         seq = "testseq01"
-        gt_dir = tmp_path / "data" / seq
+        gt_dir = tmp_path / "data" / "train" / seq
         det_dir = tmp_path / "det"
 
         # Two tracks crossing with partial overlap on frame 3
@@ -57,6 +57,7 @@ def main() -> None:
             "dataset": {
                 "name": "smoke_test",
                 "root": str(tmp_path / "data"),
+                "splits": ["train"],
                 "sequences": [],
                 "ignore_conf_zero": True,
             },
@@ -85,7 +86,7 @@ def main() -> None:
             [sys.executable, str(ROOT / "scripts" / "run_full_diagnosis.py"), "--config", str(cfg_path)],
             check=True,
         )
-        report = tmp_path / "out" / "smoke_test" / "full_diagnosis" / "REPORT.txt"
+        report = tmp_path / "out" / "smoke_test" / "train" / "full_diagnosis" / "REPORT.txt"
         assert report.exists(), "Report not generated"
         print("Smoke test OK")
         print(report.read_text(encoding="utf-8"))

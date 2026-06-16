@@ -37,10 +37,11 @@ Edit **`config.yaml`** (all paths are variables you set):
 ```yaml
 dataset:
   name: dancetrack
-  root: "D:/datasets/DanceTrack/train"   # folder of sequence subfolders
+  root: "D:/Projects/.Datasets/DanceTrack"   # whole dataset (train/val/test inside)
+  splits: [train, val]                       # empty = auto-detect train, val, test
 
 detections:
-  root: "D:/detections/yolox_dancetrack_train"
+  root: "D:/Projects/.Detections/DanceTrack"  # flat folder OR train/val subfolders
   layout: per_sequence
   format: yolox                 # yolox (frame,x1,y1,x2,y2,conf) | mot (10-field)
   score_threshold: 0.1
@@ -48,22 +49,26 @@ detections:
 
 ### Expected layout
 
-**Dataset (MOT standard):**
+**Dataset (whole dataset root):**
 ```
-<dataset_root>/
-  dancetrack0001/
-    gt/gt.txt
-    seqinfo.ini          # optional but recommended
-    img1/                # not required for analysis
-  dancetrack0002/
+<DanceTrack>/
+  train/
+    dancetrack0001/gt/gt.txt
+    dancetrack0002/gt/gt.txt
+  val/
+    dancetrack0004/gt/gt.txt
+  test/
     ...
 ```
 
-**Detections (YOLOX output — 6 fields per line):**
+**Detections (flat — all sequences in one folder):**
 ```
 <det_root>/
-  dancetrack0001.txt     # layout: per_sequence
+  dancetrack0001.txt
+  dancetrack0004.txt
 ```
+
+Or split subfolders if you have them: `<det_root>/train/`, `<det_root>/val/`
 
 YOLOX format (set `detections.format: yolox` in config):
 ```
@@ -100,7 +105,7 @@ python scripts/compare_datasets.py --configs config_dancetrack.yaml config_mot17
 
 ## Outputs
 
-Under `outputs/<dataset_name>/`:
+Under `outputs/<dataset_name>/<split>/` (e.g. `outputs/dancetrack/train/`):
 
 | Path | Content |
 |------|---------|
@@ -108,6 +113,7 @@ Under `outputs/<dataset_name>/`:
 | `full_diagnosis/REPORT.txt` | Human-readable summary |
 | `full_diagnosis/detection_sequence_summary.csv` | Per-seq recall, FN-in-occlusion, etc. |
 | `full_diagnosis/plots/recall_vs_occlusion.png` | Key DanceTrack diagnostic |
+| `_combined/full_diagnosis/split_comparison.csv` | Train vs val summary (when multiple splits) |
 | `cross_dataset/comparison.csv` | Side-by-side dataset aggregates |
 
 ## Interpreting results for OC-SORT improvements

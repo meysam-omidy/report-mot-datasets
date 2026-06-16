@@ -26,6 +26,25 @@ import pandas as pd  # noqa: E402
 
 from mot_diagnostics.config import load_config  # noqa: E402
 from mot_diagnostics.reporting import ensure_dir, save_csv  # noqa: E402
+from mot_diagnostics.splits import discover_splits, split_output_path  # noqa: E402
+
+
+def collect_aggregates(cfg) -> list[dict]:
+    splits = discover_splits(cfg.dataset.root, cfg.dataset.splits or None)
+    rows = []
+    for split in splits:
+        agg_path = (
+            split_output_path(cfg.output.root, cfg.dataset.name, split, "full_diagnosis")
+            / "dataset_aggregate.csv"
+        )
+        if not agg_path.exists():
+            print(f"Warning: missing {agg_path}")
+            continue
+        row = pd.read_csv(agg_path).iloc[0].to_dict()
+        row["dataset"] = cfg.dataset.name
+        row["split"] = split
+        rows.append(row)
+    return rows
 
 
 def main() -> None:
@@ -47,26 +66,19 @@ def main() -> None:
     aggregates = []
     for config_path in args.configs:
         cfg = load_config(config_path)
-        agg_path = (
-            cfg.output.root
-            / cfg.dataset.name
-            / "full_diagnosis"
-            / "dataset_aggregate.csv"
-        )
 
         if not args.skip_run:
             subprocess.run(
-                [sys.executable, str(ROOT / "scripts" / "run_full_diagnosis.py"), "--config", str(config_path)],
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "run_full_diagnosis.py"),
+                    "--config",
+                    str(config_path),
+                ],
                 check=True,
             )
 
-        if not agg_path.exists():
-            print(f"Warning: missing {agg_path}")
-            continue
-
-        row = pd.read_csv(agg_path).iloc[0].to_dict()
-        row["dataset"] = cfg.dataset.name
-        aggregates.append(row)
+        aggregates.extend(collect_aggregates(cfg))
 
     if not aggregates:
         raise SystemExit("No aggregate results found.")
@@ -78,6 +90,7 @@ def main() -> None:
     print("\nCross-dataset comparison:")
     cols = [
         "dataset",
+        "split",
         "mean_occluded_frame_ratio",
         "mean_objs_per_frame",
         "mean_crossing_events",

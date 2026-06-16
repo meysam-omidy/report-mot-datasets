@@ -11,6 +11,8 @@ import yaml
 class DatasetConfig:
     name: str = "dancetrack"
     root: Path = Path(".")
+    # Splits under root to process (e.g. train, val). Empty = auto-detect train/val/test.
+    splits: list[str] = field(default_factory=list)
     sequences: list[str] = field(default_factory=list)
     ignore_conf_zero: bool = True
 
@@ -62,6 +64,8 @@ def _to_path(value: Any) -> Path:
 
 def validate_paths(cfg: AppConfig, *, require_detections: bool = True) -> None:
     """Fail fast with a clear message when configured paths are missing."""
+    from mot_diagnostics.splits import discover_splits
+
     if not cfg.dataset.root.exists():
         hint = _path_hint(cfg.dataset.root)
         raise FileNotFoundError(
@@ -69,6 +73,14 @@ def validate_paths(cfg: AppConfig, *, require_detections: bool = True) -> None:
             f"Edit config.yaml -> dataset.root\n"
             f"{hint}"
         )
+
+    splits = discover_splits(cfg.dataset.root, cfg.dataset.splits or None)
+    if not splits:
+        raise FileNotFoundError(
+            f"No splits found under {cfg.dataset.root}\n"
+            f"Expected subfolders train/, val/ (and optionally test/) with sequences inside."
+        )
+
     if require_detections and not cfg.detections.root.exists():
         hint = _path_hint(cfg.detections.root)
         raise FileNotFoundError(
@@ -102,6 +114,7 @@ def load_config(path: str | Path) -> AppConfig:
         dataset=DatasetConfig(
             name=str(dataset_raw.get("name", "dancetrack")),
             root=_to_path(dataset_raw.get("root", ".")),
+            splits=list(dataset_raw.get("splits") or []),
             sequences=list(dataset_raw.get("sequences") or []),
             ignore_conf_zero=bool(dataset_raw.get("ignore_conf_zero", True)),
         ),
