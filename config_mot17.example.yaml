@@ -1,0 +1,25 @@
+# Copy and edit paths for MOT17
+dataset:
+  name: mot17
+  root: "D:/datasets/MOT17/train"
+  sequences: []
+  ignore_conf_zero: true
+
+detections:
+  root: "D:/detections/yolox_dancetrack_train"
+  layout: per_sequence
+  format: yolox
+  score_threshold: 0.1
+  extension: ".txt"
+
+output:
+  root: "./outputs"
+
+analysis:
+  iou_thresholds: [0.5, 0.75]
+  small_object_area_ratio: 0.002
+  large_object_area_ratio: 0.05
+  occlusion_iou_threshold: 0.1
+  crossing_distance_px: 30
+  crossing_min_frames: 3
+  max_gap_frames_for_fragmentation: 5

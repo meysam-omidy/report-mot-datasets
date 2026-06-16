@@ -1,0 +1,48 @@
+# =============================================================================
+# MOT Dataset & Detection Diagnostics — edit paths before running
+# =============================================================================
+
+# Dataset root: folder containing sequence subfolders (e.g. train/ or val/)
+# Expected layout per sequence:
+#   <seq_name>/gt/gt.txt
+#   <seq_name>/seqinfo.ini          (optional, for fps & frame size)
+#   <seq_name>/img1/                (optional, not required for these scripts)
+dataset:
+  name: dancetrack          # dancetrack | mot17 | mot20
+  root: "D:/Projects/.Datasets/DanceTrack/val"
+  # Optional: restrict to specific sequences (empty = all found under root)
+  sequences: []
+  # GT conf flag: rows with conf==0 are ignored (MOT standard)
+  ignore_conf_zero: true
+
+# YOLOX detections (6 fields per line: frame, x1, y1, x2, y2, conf)
+# Layout options (set layout to match your files):
+#   per_sequence — <det_root>/<seq_name>.txt
+#   per_sequence_folder — <det_root>/<seq_name>/det.txt
+#   flat — all detections in one file (not typical for MOT)
+detections:
+  root: "D:/Projects/.Detections/DanceTrack"
+  layout: per_sequence
+  format: yolox                 # yolox | mot
+  # Confidence threshold used when simulating tracker input
+  score_threshold: 0.1
+  # File extension if layout=per_sequence (.txt is standard)
+  extension: ".txt"
+
+# Output directory for reports, plots, and CSV summaries
+output:
+  root: "./outputs"
+
+# Analysis parameters (tune for your study)
+analysis:
+  iou_thresholds: [0.5, 0.75]
+  # Box area buckets as fraction of frame area (requires seqinfo.ini)
+  small_object_area_ratio: 0.002
+  large_object_area_ratio: 0.05
+  # Occlusion: two GT boxes with IoU >= this are "occluded pair"
+  occlusion_iou_threshold: 0.1
+  # Crossing: min consecutive frames two tracks stay within this center distance (px)
+  crossing_distance_px: 30
+  crossing_min_frames: 3
+  # Track gap: frames without annotation inside a GT track
+  max_gap_frames_for_fragmentation: 5
