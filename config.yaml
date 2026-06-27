@@ -16,13 +16,13 @@
 
 dataset:
 
-  name: mot20         # dancetrack | mot17 | mot20
+  name: dancetrack    # dancetrack | mot17 | mot20
 
-  root: "D:/Projects/.Datasets/MOT20"
+  root: "D:/Projects/.Datasets/DanceTrack"
 
   # Splits to process. Empty = auto-detect train, val, test under root.
 
-  splits: [train, val]
+  splits: [val]
 
   # Optional: restrict to specific sequences (empty = all found under each split)
 
@@ -40,7 +40,7 @@ dataset:
 
 detections:
 
-  root: "D:/Projects/.Detections/MOT20"
+  root: "D:/Projects/.Detections/DanceTrack"
 
   layout: per_sequence
 
@@ -66,11 +66,31 @@ analysis:
 
   large_object_area_ratio: 0.05
 
-  occlusion_iou_threshold: 0.1
+  occlusion_iou_threshold: 0.3
 
   crossing_distance_px: 30
 
   crossing_min_frames: 3
 
   max_gap_frames_for_fragmentation: 5
+
+
+
+# Occlusion/FN visualization (scripts/visualize_occlusion_fn.py)
+
+visualization:
+
+  show_tp: true                 # matched GT boxes
+
+  show_fp: true                 # unmatched detections
+
+  show_fn_occluded: true        # missed GT with overlapping GT (occluded)
+
+  show_fn_not_occluded: true    # missed GT without occlusion
+
+  show_occluded_tp_outline: true  # yellow ring on detected-but-occluded GT
+
+  show_labels: true             # id / FN tags on boxes
+
+  show_legend: true              # header bar and color key
 

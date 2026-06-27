@@ -4,3 +4,4 @@ pyyaml>=6.0
 matplotlib>=3.7
 scipy>=1.10
 tqdm>=4.65
+opencv-python>=4.8

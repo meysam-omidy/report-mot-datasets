@@ -45,11 +45,24 @@ class AnalysisConfig:
 
 
 @dataclass
+class VisualizationConfig:
+    """Which box categories to draw in occlusion/FN visualizations."""
+    show_tp: bool = True
+    show_fp: bool = True
+    show_fn_occluded: bool = True
+    show_fn_not_occluded: bool = True
+    show_occluded_tp_outline: bool = True
+    show_labels: bool = True
+    show_legend: bool = True
+
+
+@dataclass
 class AppConfig:
     dataset: DatasetConfig = field(default_factory=DatasetConfig)
     detections: DetectionConfig = field(default_factory=DetectionConfig)
     output: OutputConfig = field(default_factory=OutputConfig)
     analysis: AnalysisConfig = field(default_factory=AnalysisConfig)
+    visualization: VisualizationConfig = field(default_factory=VisualizationConfig)
 
 
 def _to_path(value: Any) -> Path:
@@ -109,6 +122,7 @@ def load_config(path: str | Path) -> AppConfig:
     det_raw = raw.get("detections", {})
     output_raw = raw.get("output", {})
     analysis_raw = raw.get("analysis", {})
+    viz_raw = raw.get("visualization", {})
 
     cfg = AppConfig(
         dataset=DatasetConfig(
@@ -142,6 +156,15 @@ def load_config(path: str | Path) -> AppConfig:
             max_gap_frames_for_fragmentation=int(
                 analysis_raw.get("max_gap_frames_for_fragmentation", 5)
             ),
+        ),
+        visualization=VisualizationConfig(
+            show_tp=bool(viz_raw.get("show_tp", True)),
+            show_fp=bool(viz_raw.get("show_fp", True)),
+            show_fn_occluded=bool(viz_raw.get("show_fn_occluded", True)),
+            show_fn_not_occluded=bool(viz_raw.get("show_fn_not_occluded", True)),
+            show_occluded_tp_outline=bool(viz_raw.get("show_occluded_tp_outline", True)),
+            show_labels=bool(viz_raw.get("show_labels", True)),
+            show_legend=bool(viz_raw.get("show_legend", True)),
         ),
     )
     return cfg
